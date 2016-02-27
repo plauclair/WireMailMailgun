@@ -3,18 +3,18 @@
 /**
  * Class WireMailMailgun
  */
-
 class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 {
-	public static function getModuleInfo() {
+	public static function getModuleInfo()
+	{
 		return array(
-			'title'     => 'Wire Mail Mailgun',
-			'version'   => '0.0.1',
-			'summary'   => "Extends WireMail through the Mailgun API",
-			'href'      => 'http://mailgun.com/',
-			'author'    => 'plauclair',
-			'singular'  => false,
-			'autoload'  => false
+			'title' => 'Wire Mail Mailgun',
+			'version' => '0.0.1',
+			'summary' => "Extends WireMail through the Mailgun API",
+			'href' => 'http://mailgun.com/',
+			'author' => 'plauclair',
+			'singular' => false,
+			'autoload' => false
 		);
 	}
 
