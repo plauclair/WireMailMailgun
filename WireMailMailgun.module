@@ -28,7 +28,6 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	 */
 	public function ___send()
 	{
-		var_dump($this->mail);
 		$request = curl_init();
 
 		$postFields = [
