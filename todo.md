@@ -9,8 +9,9 @@
 - to, cc, bcc support // DONE
 
 ### 0.2
-- Shorthand wireMail($args) usage
-- tracking clicks and opens per email
+- Shorthand wireMail($args) usage // OK
+- tracking clicks and opens per email // DONE
+- Batch mode // OK
 
 ### 0.3
 - o:tag
@@ -28,3 +29,6 @@
     - Remove user from list
     - List sync
     - Send to list `$mail->toList('name'); $mail->send()`
+
+### 0.7
+- Mailgun mail validation https://documentation.mailgun.com/api-email-validation.html

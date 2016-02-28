@@ -38,6 +38,20 @@ class WireMailMailgunConfig extends ModuleConfig
 				'columnWidth' => 50
 			),
 			array(
+				'name' => 'trackOpens',
+				'label' => __('Track Message Opens'),
+				'type' => 'Checkbox',
+				'value' => 'trackOpens',
+				'columnWidth' => 50
+			),
+			array(
+				'name' => 'trackClicks',
+				'label' => __('Track Message Clicks'),
+				'type' => 'Checkbox',
+				'value' => 'trackClicks',
+				'columnWidth' => 50
+			),
+			array(
 				'name' => 'testMode',
 				'label' => __('Enable Test Mode'),
 				'description' => __('When this option is enabled, Mailgun will accept messages but won\'t send them. [Click here for more information](https://documentation.mailgun.com/user_manual.html#sending-in-test-mode).'),

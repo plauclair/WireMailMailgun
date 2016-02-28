@@ -5,18 +5,20 @@
  *
  * @property string apiKey The API key set in config
  * @property string domain The domain for the API key
+ * @property bool batchMode True by default. See setBatchMode() method of this class for more info.
  */
 class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 {
 	private $apiUrl = 'https://api.mailgun.net/v3/';
+	private $batchMode = true;
 
 	public static function getModuleInfo()
 	{
 		return array(
 			'title' => 'Wire Mail Mailgun',
-			'version' => '0.1',
-			'summary' => "Extends WireMail through the Mailgun API",
-			'href' => 'http://mailgun.com/',
+			'version' => '0.2',
+			'summary' => "Mailgun for ProcessWire",
+			'href' => 'https://github.com/plauclair/WireMailMailgun',
 			'author' => 'plauclair',
 			'singular' => false,
 			'autoload' => false
@@ -37,14 +39,22 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 			'o:testmode' => $this->isTestMode(),
 		];
 
+		// Batch mode variables
+		if ($this->batchMode === true) {
+			$postFields['recipient-variables'] = $this->getToRecipientsVariables();
+		}
+
+		// Set CC recipients
 		if ($this->getCCRecipients() !== false) {
 			$postFields['cc'] = $this->getCCRecipients();
 		}
 
+		// Set BCC recipients
 		if ($this->getBCCRecipients() !== false) {
 			$postFields['bcc'] = $this->getBCCRecipients();
 		}
 
+		// Set body
 		if (!empty($this->mail['bodyHTML'])) {
 			$postFields['html'] = $this->mail['bodyHTML'];
 			// TODO: Replace the next line with something that
@@ -54,6 +64,19 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 			$postFields['text'] = $this->mail['body'];
 		}
 
+		// Email Open Tracking
+		if ($this->clickTracking() === true) {
+			$postFields['o:tracking-clicks'] = 'yes';
+		}
+
+		// Email Click tracking
+		if ($this->openTracking() === true) {
+			$postFields['o:tracking-opens'] = 'yes';
+		}
+
+		// Headers
+		$postFields['h:X-Mailer'] = $this->mail['header']['X-Mailer'];
+
 		$options = array(
 			CURLOPT_USERPWD => "api:{$this->apiKey}",
 			CURLOPT_URL => "{$this->apiUrl}{$this->domain}/messages",
@@ -61,7 +84,6 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 			CURLOPT_POST => true,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_POSTFIELDS => $postFields,
-			CURLOPT_HTTPHEADER => ['X-Mailer' => $this->mail['header']['X-Mailer']],
 			CURLOPT_SSL_VERIFYPEER => $this->sslCheck(),
 		);
 
@@ -204,6 +226,48 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 		}
 
 		return (!empty($to)) ? implode(',', $to) : false;
+	}
+
+	/**
+	 * Get the recipient variables
+	 *
+	 * For now, this is used to emulate the default to()
+	 * method behavior. Mailgun hard limit on this calling
+	 * style is 1000 recipients per request
+	 */
+	private function getToRecipientsVariables()
+	{
+		$recipients = $this->mail['toName'];
+		$recipientsVariables = [];
+
+		$i = 1;
+		foreach ($recipients as $email => $name) {
+			$recipientsVariables[$email] = ['id' => $i, 'name' => $name];
+			$i += 1;
+		}
+
+		return json_encode($recipientsVariables);
+	}
+
+	/**
+	 * Enables or disables batch mode
+	 *
+	 * This is on by default, meaning that all emails in the To field won't see the other recipients.
+	 */
+	public function setBatchMode($bool)
+	{
+		if (is_bool($bool)) {
+			$this->batchMode = $bool;
+		}
+	}
+
+	/**
+	 * Will allow merging an array of emails with
+	 * their recipients variables
+	 */
+	public function mergeToRecipientsVariables()
+	{
+		// THIS IS A STUB
 	}
 
 	/**
@@ -381,5 +445,32 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 			// Default
 			return "ProcessWire <processwire@{$this->domain}>";
 		}
+	}
+
+	public function setClickTracking($bool)
+	{
+		if ($bool === true) {
+			$this->trackClicks = 'trackClicks';
+		} else if ($bool === false) {
+			$this->trackClicks = null;
+		}
+	}
+
+	private function clickTracking()
+	{
+		return ($this->trackClicks == 'trackClicks') ? true : false;
+	}
+
+	public function setOpenTracking($bool)
+	{
+		if ($bool === true) {
+			$this->trackOpens = 'trackOpens';
+		} else if ($bool === false) {
+			$this->trackOpens = null;
+		}
+	}
+
+	private function openTracking() {
+		return ($this->trackOpens == 'trackOpens') ? true : false;
 	}
 }
