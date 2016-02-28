@@ -1,11 +1,16 @@
 ## To implement:
 
 ###0.1
-- to single | csv array Bob <bob@host.com>
+- to single | csv array Bob <bob@host.com> // DONE
+- o:testmode flag https://documentation.mailgun.com/api-sending.html#sending // DONE
+- set domain // DONE
+- set apikey // DONE
+- html and plain text // DONE
+- to, cc, bcc support // DONE
 
 ### 0.2
-- o:testmode flag https://documentation.mailgun.com/api-sending.html#sending
-- tracking flags per email
+- Shorthand wireMail($args) usage
+- tracking clicks and opens per email
 
 ### 0.3
 - o:tag
