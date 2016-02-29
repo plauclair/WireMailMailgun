@@ -9,11 +9,12 @@
 - to, cc, bcc support // DONE
 
 ### 0.2
-- Shorthand wireMail($args) usage // OK
+- Shorthand wireMail($args) usage // DONE
 - tracking clicks and opens per email // DONE
-- Batch mode // OK
+- Batch mode // DONE
 
 ### 0.3
+- attachments // DONE
 - o:tag
 - o:campaign
 

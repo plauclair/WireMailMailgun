@@ -15,7 +15,7 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	public static function getModuleInfo()
 	{
 		return array(
-			'title' => 'Wire Mail Mailgun',
+			'title' => 'WireMail Mailgun',
 			'version' => '0.2',
 			'summary' => "Mailgun for ProcessWire",
 			'href' => 'https://github.com/plauclair/WireMailMailgun',
@@ -73,6 +73,17 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 		if ($this->openTracking() === true) {
 			$postFields['o:tracking-opens'] = 'yes';
 		}
+
+		// Attachments
+		if (!empty($this->mail['attachments'])) {
+			$a = 0;
+			foreach ($this->mail['attachments'] as $attachment) {
+				$postFields["attachment[$a]"] = curl_file_create($attachment);
+				$a += 1;
+			}
+		}
+		//$postFields['attachment[1]'] = curl_file_create('/Users/plauclair/Sites/pw-mailgun/wwwroot/site/templates/README.txt');
+		//$postFields['attachment[2]'] = curl_file_create('/Users/plauclair/Sites/pw-mailgun/wwwroot/site/templates/README2.txt');
 
 		// Headers
 		$postFields['h:X-Mailer'] = $this->mail['header']['X-Mailer'];
@@ -470,7 +481,13 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 		}
 	}
 
-	private function openTracking() {
+	private function openTracking()
+	{
 		return ($this->trackOpens == 'trackOpens') ? true : false;
+	}
+
+	public function addAttachment($filepath)
+	{
+		$this->mail['attachments'][] = realpath($filepath);
 	}
 }

@@ -43,3 +43,7 @@ Note that in both cases all CCs and BCCs will be delivered for **each email sent
 **$WireMailMailgun->setClickTracking( *bool* $bool )**
 
 **$WireMailMailgun->setOpenTracking( *bool* $bool )**
+
+**$WireMailMailgun->addAttachment( *string* $filepath )**
+
+Usage is the same as [realpath()](http://php.net/manual/fr/function.realpath.php) internally for convenience.
