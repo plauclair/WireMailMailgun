@@ -597,6 +597,8 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 
 		if (!empty($tag) and count($this->tags) <= 3) {
 			$this->tags[] = $tag;
+		} else if (count($this->tags) > 3) {
+			$this->log()->save('mailgun', "Tags: Tried to use more than 3 tags. Mailgun supports a maximum of 3 at a time.");
 		}
 	}
 
