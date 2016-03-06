@@ -15,7 +15,7 @@
 
 ### 0.3
 - attachments // DONE
-- o:tag
+- o:tag // DONE
 - o:campaign
 
 ### 0.4

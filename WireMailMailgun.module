@@ -11,6 +11,7 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 {
 	private $apiUrl = 'https://api.mailgun.net/v3/';
 	private $batchMode = true;
+	private $tags = [];
 
 	public static function getModuleInfo()
 	{
@@ -65,28 +66,41 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 		}
 
 		// Email Open Tracking
-		if ($this->clickTracking() === true) {
-			$postFields['o:tracking-clicks'] = 'yes';
-		}
+		$postFields['o:tracking-clicks'] = ($this->clickTracking() === true) ? 'yes' : 'no';
 
 		// Email Click tracking
-		if ($this->openTracking() === true) {
-			$postFields['o:tracking-opens'] = 'yes';
-		}
+		$postFields['o:tracking-opens'] = ($this->openTracking() === true) ? 'yes' : 'no';
 
 		// Attachments
-		if (!empty($this->mail['attachments'])) {
-			$a = 0;
-			foreach ($this->mail['attachments'] as $attachment) {
-				$postFields["attachment[$a]"] = curl_file_create($attachment);
-				$a += 1;
+		if ($this->getAttachments() !== false) {
+			$attachmentIndex = 0;
+			foreach ($this->getAttachments() as $attachment) {
+				if (function_exists('curl_file_create')) {
+					// PHP >= 5.5.0
+					$postFields["attachment[$attachmentIndex]"] = curl_file_create($attachment);
+				} else {
+					// PHP < 5.5.0
+					$postFields["attachment[$attachmentIndex]"] = "@{$attachment}";
+				}
+				$attachmentIndex += 1;
 			}
 		}
-		//$postFields['attachment[1]'] = curl_file_create('/Users/plauclair/Sites/pw-mailgun/wwwroot/site/templates/README.txt');
-		//$postFields['attachment[2]'] = curl_file_create('/Users/plauclair/Sites/pw-mailgun/wwwroot/site/templates/README2.txt');
 
 		// Headers
-		$postFields['h:X-Mailer'] = $this->mail['header']['X-Mailer'];
+		if ($this->getHeaders() !== false) {
+			foreach ($this->getHeaders() as $header => $value) {
+				$postFields["h:{$header}"] = $value;
+			}
+		}
+
+		// Tags
+		if ($this->getTags() !== false) {
+			$tagIndex = 0;
+			foreach ($this->getTags() as $tag) {
+				$postFields["o:tag[$tagIndex]"] = $tag;
+				$tagIndex += 1;
+			}
+		}
 
 		$options = array(
 			CURLOPT_USERPWD => "api:{$this->apiKey}",
@@ -279,6 +293,7 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	public function mergeToRecipientsVariables()
 	{
 		// THIS IS A STUB
+		// TODO: Implement this..
 	}
 
 	/**
@@ -458,6 +473,14 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 		}
 	}
 
+	/**
+	 * Overrides "click tracking" module settings on a per-email basis
+	 *
+	 * Note: per Mailgun constraints, click tracking will
+	 * only work on HTML emails
+	 *
+	 * @param bool $bool
+	 */
 	public function setClickTracking($bool)
 	{
 		if ($bool === true) {
@@ -467,11 +490,25 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 		}
 	}
 
+	/**
+	 * Returns whether the current email has click tracking
+	 * enabled or not
+	 *
+	 * @return bool
+	 */
 	private function clickTracking()
 	{
 		return ($this->trackClicks == 'trackClicks') ? true : false;
 	}
 
+	/**
+	 * Overrides "open tracking module" settings on a per-email basis
+	 *
+	 * Note: per Mailgun constraints, open tracking will
+	 * only work on HTML emails
+	 *
+	 * @param bool $bool
+	 */
 	public function setOpenTracking($bool)
 	{
 		if ($bool === true) {
@@ -481,13 +518,99 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 		}
 	}
 
+	/**
+	 * Returns whether the current email has open tracking
+	 * enabled or not
+	 *
+	 * @return bool
+	 */
 	private function openTracking()
 	{
 		return ($this->trackOpens == 'trackOpens') ? true : false;
 	}
 
-	public function addAttachment($filepath)
+	/**
+	 * Adds an attachment to the email using a file path
+	 *
+	 * @param string $filePath
+	 */
+	public function addAttachment($filePath)
 	{
-		$this->mail['attachments'][] = realpath($filepath);
+		$this->mail['attachments'][] = realpath($filePath);
+	}
+
+	/**
+	 * Gets attachments, or return false if there are none
+	 *
+	 * @return array|false
+	 */
+	private function getAttachments()
+	{
+		if (isset($this->mail['attachments']) and !empty($this->mail['attachments'])) {
+			return $this->mail['attachments'];
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns an array of the custom-defined headers
+	 *
+	 * @return array
+	 */
+	private function getHeaders()
+	{
+		if (isset($this->mail['header']) and !empty($this->mail['header'])) {
+			return $this->mail['header'];
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Adds a tag to the email
+	 *
+	 * Will add up to 3 tags. Any string passed to this
+	 * function will be converted to ASCII and trimmed to
+	 * be 128 characters long.
+	 *
+	 * It is STRONGLY recommended that you enable
+	 * the PHP 'intl' module if you want correct
+	 * UTF-8 to ASCII conversion
+	 *
+	 * See https://documentation.mailgun.com/user_manual.html#tagging
+	 *
+	 * @param string $tag
+	 */
+	public function addTag($tag)
+	{
+		if (function_exists('transliterator_transliterate')) {
+			// convert to ASCII
+			$tag = transliterator_transliterate('Any-Latin; Latin-ASCII; [\u0080-\u7fff] remove', $tag);
+		} else {
+			// basic fallback to iconv... might be unreliable but kind of works
+			$tag = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $tag);
+		}
+
+		$tag = trim($tag);
+		$tag = substr($tag, 0, 128);
+
+		if (!empty($tag) and count($this->tags) <= 3) {
+			$this->tags[] = $tag;
+		}
+	}
+
+	/**
+	 * Gets tags, or return false if there are none
+	 *
+	 * @return array|false
+	 */
+	private function getTags()
+	{
+		if (isset($this->tags) and !empty($this->tags)) {
+			return $this->tags;
+		} else {
+			return false;
+		}
 	}
 }
