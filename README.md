@@ -1,6 +1,6 @@
 # WireMailMailgun
 
-Mailgun for ProcessWire
+Mailgun module for ProcessWire
 
 ## Configuration
 
