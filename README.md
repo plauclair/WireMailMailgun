@@ -47,3 +47,9 @@ Note that in both cases all CCs and BCCs will be delivered for **each email sent
 **$WireMailMailgun->addAttachment( *string* $filepath )**
 
 Usage is the same as [realpath()](http://php.net/manual/fr/function.realpath.php) internally for convenience.
+
+**$WireMailMailgun->addTag( *string* $tag )**
+
+Add a tag to the email. Note that there is a maximum number of 3 tags allowed per email. 
+
+Also, the tag string should be ASCII only and its length should be 128 characters or less. If any of those conditions are not met, the module will convert any non-ASCII characters to ASCII and trim the string length to 128.
