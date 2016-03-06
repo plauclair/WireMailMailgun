@@ -17,7 +17,7 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	{
 		return array(
 			'title' => 'WireMail Mailgun',
-			'version' => '0.2',
+			'version' => '0.3',
 			'summary' => "Mailgun for ProcessWire",
 			'href' => 'https://github.com/plauclair/WireMailMailgun',
 			'author' => 'plauclair',
