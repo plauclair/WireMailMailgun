@@ -4,6 +4,7 @@
  * Class WireMailMailgun
  *
  * @property string apiKey The API key set in config
+ * @property string publicApiKey The public API key set in config
  * @property string domain The domain for the API key
  * @property bool batchMode True by default. See setBatchMode() method of this class for more info.
  */
@@ -17,7 +18,7 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	{
 		return array(
 			'title' => 'WireMail Mailgun',
-			'version' => '0.3',
+			'version' => '0.4',
 			'summary' => "Mailgun for ProcessWire",
 			'href' => 'https://github.com/plauclair/WireMailMailgun',
 			'author' => 'plauclair',
@@ -536,7 +537,12 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	 */
 	public function addAttachment($filePath)
 	{
-		$this->mail['attachments'][] = realpath($filePath);
+		if (realpath($filePath) !== false) {
+			$this->mail['attachments'][] = realpath($filePath);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -613,6 +619,59 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 			return $this->tags;
 		} else {
 			return false;
+		}
+	}
+
+	/**
+	 * Validates a single address using Mailgun's address validation service
+	 *
+	 * For more information on what this method returns,
+	 * visit https://documentation.mailgun.com/api-email-validation.html#email-validation
+	 *
+	 * return array|false Returns an array of validation data from Mailgun
+	 */
+	public function validateEmail($email)
+	{
+		// if public API key isn't set, log that
+		if (empty($this->publicApiKey)) {
+			$this->log()->save('mailgun', 'The Public API Key must be set when using the email validation feature.');
+			return false;
+		}
+
+		$email = filter_var($email, FILTER_SANITIZE_STRING);
+		// if it fails basic string validation, stop
+		if ($email == false){
+			return false;
+		}
+		$email = urlencode($email);
+
+		$request = curl_init();
+
+		$options = array(
+			CURLOPT_USERPWD => "api:{$this->publicApiKey}",
+			CURLOPT_URL => "{$this->apiUrl}address/validate?address={$email}",
+			CURLOPT_HEADER => false,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_SSL_VERIFYPEER => $this->sslCheck(),
+		);
+
+		curl_setopt_array($request, $options);
+
+		$response = curl_exec($request);
+
+		if ($response === false) {
+			// If an error occurred in cURL
+			$this->log()->save('mailgun', 'cURL Error: ' . curl_error($request));
+			curl_close($request);
+			return false;
+		} else {
+			$response = json_decode($response);
+
+			$info = curl_getinfo($request);
+
+			curl_close($request);
+
+			return $response;
 		}
 	}
 }

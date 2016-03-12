@@ -64,7 +64,14 @@ class WireMailMailgunConfig extends ModuleConfig
 				'description' => __("If you see the following error in ProcessWire Mailgun logs: *cURL Error: SSL certificate problem: unable to get local issuer certificate*.\nThis option will work around this issue. It might help on some development configurations, but it is recommended that you leave this option unchecked on production servers."),
 				'type' => 'Checkbox',
 				'value' => 'disableSslCheck'
-			)
+			),
+			array(
+				'name' => 'publicApiKey',
+				'label' => __('Mailgun Public API Key'),
+				'description' => __("You can find your Public API Key [on Mailgun](https://mailgun.com/app/dashboard)\nNote that the Public API Key is only required if you use the `validateEmail()` feature."),
+				'required' => false,
+				'type' => 'Text'
+			),
 		));
 	}
 }

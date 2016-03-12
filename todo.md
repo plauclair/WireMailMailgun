@@ -16,20 +16,20 @@
 ### 0.3
 - [x] attachments
 - [x] o:tag
-- [ ] o:campaign
 
 ### 0.4
-- [ ] Stats dashboard
+- [x] Mailgun mail validation https://documentation.mailgun.com/api-email-validation.html
 
 ### 0.5
-- [ ] List of latest sent emails with click/open tracking
+- [ ] o:campaign
+- [ ] Stats dashboard
 
 ### 0.6
+- [ ] List of latest sent emails with click/open tracking
+
+### 0.7
 - [ ] List management and sending
     - [ ] Add user to list
     - [ ] Remove user from list
     - [ ] List sync
     - [ ] Send to list `$mail->toList('name'); $mail->send()`
-
-### 0.7
-- [ ] Mailgun mail validation https://documentation.mailgun.com/api-email-validation.html
