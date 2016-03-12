@@ -628,7 +628,9 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	 * For more information on what this method returns,
 	 * visit https://documentation.mailgun.com/api-email-validation.html#email-validation
 	 *
-	 * return array|false Returns an array of validation data from Mailgun
+	 * return object|false Returns an array of validation data from Mailgun
+	 * @param string $email
+	 * @return object|false
 	 */
 	public function validateEmail($email)
 	{
