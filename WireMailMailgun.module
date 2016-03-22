@@ -18,7 +18,7 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	{
 		return array(
 			'title' => 'WireMail Mailgun',
-			'version' => '0.4',
+			'version' => '0.4.1',
 			'summary' => "Mailgun for ProcessWire",
 			'href' => 'https://github.com/plauclair/WireMailMailgun',
 			'author' => 'plauclair',
@@ -462,12 +462,15 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	 */
 	private function getFrom()
 	{
+		$fromEmail = $this->fromEmail;
+		$fromName = $this->fromName;
+
 		if (!empty($this->mail['from'])) {
 			// Set manually
 			return (empty($this->mail['fromName'])) ? $this->mail['from'] : "{$this->mail['fromName']} <{$this->mail['from']}>";
-		} else if (!empty($this->fromEmail)) {
+		} else if (!empty($fromEmail)) {
 			// Set in settings
-			return (empty($this->fromName)) ? "ProcessWire <{$this->fromEmail}>" : "{$this->fromName} <{$this->fromEmail}>";
+			return (empty($fromName)) ? "ProcessWire <{$fromEmail}>" : "{$fromName} <{$fromEmail}>";
 		} else {
 			// Default
 			return "ProcessWire <processwire@{$this->domain}>";
