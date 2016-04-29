@@ -18,7 +18,7 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	{
 		return array(
 			'title' => 'WireMail Mailgun',
-			'version' => '0.4.1',
+			'version' => '0.4.2',
 			'summary' => "Mailgun for ProcessWire",
 			'href' => 'https://github.com/plauclair/WireMailMailgun',
 			'author' => 'plauclair',
@@ -178,7 +178,7 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	 */
 	public function send()
 	{
-		$this->___send();
+		return $this->___send();
 	}
 
 	/**
@@ -593,9 +593,11 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	 */
 	public function addTag($tag)
 	{
-		if (function_exists('transliterator_transliterate')) {
+		// check if transliterator_transliterate exists and translit ID is valid on current system
+		$transId = 'Any-Latin; Latin-ASCII; [\u0080-\u7fff] remove';
+		if (function_exists('transliterator_transliterate') and ($transliterator = \Transliterator::create($transId))) {
 			// convert to ASCII
-			$tag = transliterator_transliterate('Any-Latin; Latin-ASCII; [\u0080-\u7fff] remove', $tag);
+			$transString = $transliterator->transliterate($tag);
 		} else {
 			// basic fallback to iconv... might be unreliable but kind of works
 			$tag = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $tag);
