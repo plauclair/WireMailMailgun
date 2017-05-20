@@ -13,6 +13,7 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	private $apiUrl = 'https://api.mailgun.net/v3/';
 	private $batchMode = true;
 	private $tags = [];
+	private $recipientsVariables = [];
 
 	public static function getModuleInfo()
 	{
@@ -264,15 +265,32 @@ class WireMailMailgun extends WireMail implements Module, ConfigurableModule
 	private function getToRecipientsVariables()
 	{
 		$recipients = $this->mail['toName'];
-		$recipientsVariables = [];
 
 		$i = 1;
 		foreach ($recipients as $email => $name) {
-			$recipientsVariables[$email] = ['id' => $i, 'name' => $name];
+			if (! array_key_exists($email, $this->recipientsVariables)) {
+				$this->recipientsVariables[$email] = [];
+			}
+			$this->recipientsVariables[$email]['id'] = $i;
+			$this->recipientsVariables[$email]['name'] = $name;
 			$i += 1;
 		}
 
-		return json_encode($recipientsVariables);
+		return json_encode($this->recipientsVariables);
+	}
+
+	/**
+	 * Set the recipient variables
+	 *
+	 * Add variables for a batch email.
+	 *
+	 * @param array $recipientVariables
+	 */
+	public function setToRecipientsVariables(array $recipientVariables)
+	{
+		$this->recipientsVariables = $recipientVariables;
+
+		return $this;
 	}
 
 	/**

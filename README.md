@@ -40,6 +40,18 @@ Note that in both cases all CCs and BCCs will be delivered for **each email sent
 
 **Important**: Mailgun has a maximum hard limit of recipients allowed per batch of 1,000. [Read more about batch sending.](https://documentation.mailgun.com/user_manual.html#batch-sending)
 
+**$WireMailMailgun->setToRecipientsVariables( *array* $array )**
+
+Add custom variables for batch mode. ex.:
+```
+$WireMailMailgun->setToRecipientsVariables(array(
+	'someone@example.com' => array(
+		'username' => 'Someone',
+		'token' => '123456',
+	), ...
+));
+```
+
 **$WireMailMailgun->setClickTracking( *bool* $bool )**
 
 **$WireMailMailgun->setOpenTracking( *bool* $bool )**
